@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Flappy Ball</title>
+	<style>
+canvas { 
+	background:pink ;
+	 display: block;
+	  margin: 0 auto; 
+		}
+	
+	  </style>
+</head>
+<body>
+<center>
+游戏规则：<br>
+通过按压空格键来使小球跳动，通过前方的障碍物，<br>
+若触碰到画布上下边或者障碍物的三边即game over，<br>
+第一关每通过一个障碍物即得5分，第二关每通过一个障碍物得4分，<br>
+第三关每通过一个障碍物即得3分，达到预先设定的分数即为you win！<br>
+</center>
+<canvas class="Canvas" width="800" height="600"></canvas>
+
+<script type="text/javascript">
+
+    var Canvas = document.querySelector("Canvas");
+    var ctx = Canvas.getContext('2d');
+    var w = Canvas.width;
+	var h = Canvas.height;
+//设定按压的空格键
+	var  Pressed;
+	document.addEventListener("keydown",chkDown,false);
+	document.addEventListener("keyup",chkUp,false);
+	function chkDown() {
+		if ( event.keyCode == 32 ) Pressed = true;
+	}
+	function chkUp() {
+		if ( event.keyCode == 32 ) Pressed = false;
+	}
+//半徑
+  var r1=15;
+  //球心
+  var x1=w/2;
+  var y1=h/2; 
+//按壓一下小球向上的距離  
+  var dy1=20;
+//設定速度與重力
+  var ver1 = 10;
+  var ver2;
+  var gravity = 2;
+//畫圓
+function Circle() {
+	ctx.beginPath();
+	ctx.arc(x1,y1,r1, 0, Math.PI*2, false);
+	ctx.fillStyle= "orange";//修改颜色
+	ctx.fill();
+	ctx.closePath();
+  }
+	//畫管子
+	var longSide=80;
+	var shortSide1=310;
+	var shortSide2=210;
+	//上長管子
+    var x2=720; 
+	var y2=0;
+	//下短管子 
+	var x3=720;
+	var y3=390;
+	//上短管子
+	var x4=1150;
+	var y4=0;
+	//下長管子
+	var x5=1150;
+	var y5=290;
+	var dx=15;
+	//上長下短的管子
+function drawRacket1() {
+		ctx.beginPath();
+		ctx.rect(x2,y2,longSide, shortSide1);
+		ctx.fillStyle="#2EE59C";//修改颜色
+		ctx.fill();
+		ctx.closePath();
+		ctx.beginPath();
+		ctx.rect(x3,y3,longSide, shortSide2);
+		ctx.fillStyle="#2EE59C";//修改颜色
+		ctx.fill();
+		ctx.closePath();
+  }
+  //上短下長的管子
+function drawRacket2() {
+		ctx.beginPath();
+		ctx.rect(x4,y4,longSide, shortSide2);
+		ctx.fillStyle="#2EE59C";//修改颜色
+		ctx.fill();
+		ctx.closePath();
+		ctx.beginPath();
+		ctx.rect(x5,y5,longSide, shortSide1);
+		ctx.fillStyle="#2EE59C";//修改颜色
+		ctx.fill();
+		ctx.closePath();
+  }
+  //設定分數
+    var level=1;
+	var score=0;
+	var lastScore=sessionStorage.getItem("Score");
+	switch(lastScore) {
+		case '22':
+		score=lastScore, level=2,dx=20;
+			 break;
+		case '44':
+		score=lastScore, level=3,dx=25;	 
+			 break;
+		case '66':
+		    alert("you win all the game ! Score: " + sessionStorage.getItem("Score"));
+			window.close();
+			break;
+
+		default:
+		lastScore=0;	 
+	} 
+function drawScore() {
+        ctx.font = "16px Arial";
+        ctx.fillStyle = "red";
+        ctx.fillText("請使用space鍵來控制小球進行遊戲！Score: "+score, 8, 20);
+    }
+function drawlevel() {
+        ctx.font = "16px Arial";
+        ctx.fillStyle = "blue";
+        ctx.fillText("Level: "+level, 8, 40);
+    }
+function createStorage(score) {
+   sessionStorage.setItem("Score", score);
+}
+	//主函數
+function draw() {
+  ctx.clearRect(0,0,w,h);
+	Circle();
+    drawRacket1();
+	drawRacket2();
+	drawScore();
+drawlevel();
+//給小球加重力
+   ver2 = ver1+gravity;
+  y1 += (ver2+ver1)*0.5;
+//管子循環移動
+	if( x2 - dx < -80 )  	x2=800;
+	if( x3 - dx < -80 )  	x3=800;
+	if( x4 - dx < -80)  	x4=800;
+	if( x5 - dx < -80 )  	x5=800;
+	x2=x2-dx;
+	x3=x3-dx;
+	x4=x4-dx;
+	x5=x5-dx;
+//小球通過障礙物的條件
+if(310<x2&&x2<390 ){
+if (shortSide1+r1<y1&&y1<y3+r1/2) score++;
+else{ 
+                alert("Game Over");
+				clearInterval(game);
+				window.location.reload();
+
+}}
+if(310<x4&&x4<390 ){
+if (shortSide2+r1<y1&&y1<y5+r1/2) score++;
+else{ 
+                alert("Game Over");
+				clearInterval(game);
+				window.location.reload();
+
+}}
+if(y1+r1>h+r1||y1<0){
+	alert("Game Over");
+				clearInterval(game); 
+				window.location.reload();
+}
+//空格鍵按壓使下墜的小球向上移動
+	if(Pressed) 
+    y1 -= dy1;
+	
+	if(score>21+ parseInt(lastScore)){
+	clearInterval(game);
+	createStorage(score);
+	alert("you win! Score: " + sessionStorage.getItem("Score"));
+	window.location.reload();
+	}        
+}
+var game =setInterval(draw,100); 
+</script>
+
+</body>
